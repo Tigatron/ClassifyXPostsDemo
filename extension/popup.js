@@ -13,9 +13,101 @@ function applyColorScheme() {
 
 applyColorScheme();
 
+function normalizePermalink(link) {
+  if (typeof link !== 'string') {
+    return null;
+  }
+  const trimmed = link.trim();
+  if (!trimmed) {
+    return null;
+  }
+
+  const ensureHttpUrl = (value, base = undefined) => {
+    try {
+      const url = base ? new URL(value, base) : new URL(value);
+      if (url.protocol === 'http:' || url.protocol === 'https:') {
+        return url.href;
+      }
+      return null;
+    } catch (_error) {
+      return null;
+    }
+  };
+
+  if (/^https?:/i.test(trimmed)) {
+    return ensureHttpUrl(trimmed);
+  }
+  if (trimmed.startsWith('/')) {
+    return ensureHttpUrl(trimmed, 'https://x.com');
+  }
+  return ensureHttpUrl(`https://x.com/${trimmed.replace(/^\/+/, '')}`);
+}
+
 function setStatus(message, isError = false) {
   statusEl.textContent = message;
   statusEl.style.color = isError ? '#f87171' : '';
+}
+
+function createPostListItem(post, fallbackIndex) {
+  const li = document.createElement('li');
+  li.className = 'result-post';
+
+  if (typeof post === 'string') {
+    li.textContent = post;
+    return li;
+  }
+
+  const metaSegments = [];
+  const displayIndex = Number.isFinite(post.index)
+    ? post.index
+    : Number.isFinite(post.id)
+    ? post.id
+    : Number.isFinite(post.order)
+    ? post.order
+    : fallbackIndex;
+
+  if (Number.isFinite(displayIndex)) {
+    metaSegments.push(`#${displayIndex}`);
+  }
+  if (post.author) {
+    metaSegments.push(post.author);
+  }
+
+  if (metaSegments.length > 0) {
+    const metaEl = document.createElement('span');
+    metaEl.className = 'post-meta';
+    metaEl.textContent = metaSegments.join(' ｜ ');
+    li.appendChild(metaEl);
+  }
+
+  const excerpt = post.excerpt ?? post.text ?? post.summary ?? '';
+  if (excerpt) {
+    const excerptEl = document.createElement('p');
+    excerptEl.className = 'post-excerpt';
+    excerptEl.textContent = excerpt;
+    li.appendChild(excerptEl);
+  }
+
+  const reasonDetail = post.detail ?? post.note ?? null;
+  const secondaryReason = post.reason ?? post.explanation ?? post.justification ?? '';
+  if (reasonDetail || secondaryReason) {
+    const reasonEl = document.createElement('p');
+    reasonEl.className = 'post-reason';
+    reasonEl.textContent = reasonDetail ? reasonDetail : `原因：${secondaryReason}`;
+    li.appendChild(reasonEl);
+  }
+
+  const link = normalizePermalink(post.permalink ?? post.url ?? post.link);
+  if (link) {
+    const linkEl = document.createElement('a');
+    linkEl.href = link;
+    linkEl.target = '_blank';
+    linkEl.rel = 'noopener noreferrer';
+    linkEl.textContent = '查看原帖';
+    li.appendChild(linkEl);
+  }
+
+  return li;
 }
 
 function renderResults(result) {
@@ -32,30 +124,27 @@ function renderResults(result) {
     const block = document.createElement('article');
     block.className = 'result-block';
 
+    const posts = category.posts ?? category.items ?? category.entries ?? [];
+    const count = Array.isArray(posts) ? posts.length : 0;
+
     const heading = document.createElement('h2');
-    heading.textContent = category.name ?? category.title ?? '未命名分类';
+    const title = category.name ?? category.title ?? '未命名分类';
+    heading.textContent = count > 0 ? `${title}（${count}）` : title;
     block.appendChild(heading);
 
-    if (category.summary) {
+    if (category.summary ?? category.description) {
       const summary = document.createElement('p');
-      summary.textContent = category.summary;
+      summary.className = 'result-summary';
+      summary.textContent = category.summary ?? category.description;
       block.appendChild(summary);
     }
 
-    const posts = category.posts ?? category.items ?? category.entries ?? [];
-    if (posts.length > 0) {
+    if (count > 0) {
       const list = document.createElement('ul');
-      for (const post of posts) {
-        const li = document.createElement('li');
-        if (typeof post === 'string') {
-          li.textContent = post;
-        } else {
-          const segments = [post.index ? `#${post.index}` : null, post.author ?? null, post.excerpt ?? post.text ?? null, post.reason ?? null]
-            .filter(Boolean);
-          li.textContent = segments.join(' ｜ ');
-        }
-        list.appendChild(li);
-      }
+      list.className = 'result-list';
+      posts.forEach((post, index) => {
+        list.appendChild(createPostListItem(post, index + 1));
+      });
       block.appendChild(list);
     }
 
@@ -70,7 +159,12 @@ function extractJson(text) {
     throw new Error('AI 响应中缺少 JSON 数据。');
   }
   const jsonSnippet = text.slice(first, last + 1);
-  return JSON.parse(jsonSnippet);
+  try {
+    return JSON.parse(jsonSnippet);
+  } catch (error) {
+    console.error('Failed to parse AI response', error, text);
+    throw new Error('无法解析 AI 输出的 JSON。');
+  }
 }
 
 async function classifyPostsWithAI(posts) {
@@ -84,7 +178,10 @@ async function classifyPostsWithAI(posts) {
   }
   if (capabilities.available === 'after-download') {
     setStatus('正在下载内置模型，请稍候…');
-    await ai.languageModel.create();
+    const warmupSession = await ai.languageModel.create();
+    if (warmupSession && typeof warmupSession.destroy === 'function') {
+      warmupSession.destroy();
+    }
   }
 
   const session = await ai.languageModel.create({
@@ -95,23 +192,67 @@ async function classifyPostsWithAI(posts) {
     topK: 32,
   });
 
-  const formattedPosts = posts
-    .map((post, index) => {
-      const header = `帖子${index + 1}`;
-      const author = post.author ? ` 作者：${post.author}` : '';
-      const time = post.timestamp ? ` 时间：${post.timestamp}` : '';
-      return `${header}${author}${time}\n内容：${post.text}`;
-    })
-    .join('\n\n');
+  try {
+    const formattedEntries = [];
+    const MAX_PROMPT_CHARS = 12_000;
+    let accumulatedLength = 0;
+    let truncatedCount = 0;
 
-  const prompt =
-    '请阅读以下来自 X 书签的帖子，并将它们按主题分类。' +
-    '请返回 JSON，字段结构如下：{"categories": [{"name": "分类名称", "summary": "该分类的简要说明", "posts": [{"index": 数字, "author": "作者", "excerpt": "帖子摘要", "reason": "分类原因"}]}]}。' +
-    '请务必只输出 JSON，不要添加额外说明。\n\n' +
-    formattedPosts;
+    for (let index = 0; index < posts.length; index += 1) {
+      const post = posts[index];
+      const pieces = [`帖子${index + 1}`];
+      if (post.author) {
+        pieces.push(`作者：${post.author}`);
+      }
+      if (post.timestamp) {
+        pieces.push(`时间：${post.timestamp}`);
+      }
+      const normalizedLink = normalizePermalink(post.permalink);
+      if (normalizedLink) {
+        pieces.push(`链接：${normalizedLink}`);
+      }
+      const header = pieces.join(' ｜ ');
+      const rawText = typeof post.text === 'string' ? post.text : '';
+      const truncatedText = rawText.length > 600 ? `${rawText.slice(0, 600)}…` : rawText;
+      const safeContent = truncatedText || (typeof post.excerpt === 'string' ? post.excerpt : '（无文本）');
+      const entry = `${header}\n内容：${safeContent}`;
+      const projectedLength = accumulatedLength + entry.length + 2;
+      if (projectedLength > MAX_PROMPT_CHARS) {
+        truncatedCount = posts.length - index;
+        break;
+      }
+      formattedEntries.push(entry);
+      accumulatedLength = projectedLength;
+    }
 
-  const response = await session.prompt(prompt);
-  return extractJson(response);
+    if (formattedEntries.length === 0) {
+      throw new Error('书签内容过长，无法提交给内置模型。请减少帖子数量后重试。');
+    }
+
+    const formattedPosts = formattedEntries.join('\n\n');
+
+    const prompt =
+      '请阅读以下来自 X 书签的帖子，并将它们按主题分类。' +
+      '请返回 JSON，字段结构如下：{"categories": [{"name": "分类名称", "summary": "该分类的简要说明", "posts": [{"index": 数字, "author": "作者", "excerpt": "帖子摘要", "reason": "分类原因", "permalink": "原帖链接"}]}]}。' +
+      '请务必只输出 JSON，不要添加额外说明。\n\n' +
+      formattedPosts;
+
+    const included = truncatedCount > 0 ? posts.length - truncatedCount : formattedEntries.length;
+    const statusMessage =
+      truncatedCount > 0
+        ? `AI 正在生成分类结果…（已限制为前 ${included} 条）`
+        : 'AI 正在生成分类结果…';
+    setStatus(statusMessage);
+    const response = await session.prompt(prompt);
+    if (typeof response !== 'string') {
+      throw new Error('AI 响应格式异常。');
+    }
+    return extractJson(response);
+  } finally {
+    if (session && typeof session.destroy === 'function') {
+      session.destroy();
+    }
+  }
 }
 
 async function requestBookmarkPosts() {
@@ -125,7 +266,12 @@ async function requestBookmarkPosts() {
     throw new Error('请在 X 书签页面打开插件。');
   }
 
-  const response = await chrome.tabs.sendMessage(tab.id, { type: 'COLLECT_BOOKMARK_POSTS' });
+  let response;
+  try {
+    response = await chrome.tabs.sendMessage(tab.id, { type: 'COLLECT_BOOKMARK_POSTS' });
+  } catch (error) {
+    throw new Error(error?.message ?? '无法与页面内容脚本通信。');
+  }
   if (!response?.ok) {
     throw new Error(response?.message ?? '采集书签帖子失败。');
   }
