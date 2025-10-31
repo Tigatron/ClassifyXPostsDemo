@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>插件设置</title>
+    <link rel="stylesheet" href="options.css" />
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>X 书签智能分类 - 设置</h1>
+        <p class="description">配置分类规则、Summarizer 参数和导出偏好。修改后点击保存即可生效。</p>
+      </header>
+
+      <section>
+        <h2>Summarizer 参数</h2>
+        <div class="field-grid">
+          <label>
+            <span>摘要类型</span>
+            <select id="summarizer-type">
+              <option value="key-points">关键要点</option>
+              <option value="paragraph">段落摘要</option>
+              <option value="headline">标题摘要</option>
+            </select>
+          </label>
+          <label>
+            <span>摘要长度</span>
+            <select id="summarizer-length">
+              <option value="short">短</option>
+              <option value="medium">中</option>
+              <option value="long">长</option>
+            </select>
+          </label>
+          <label>
+            <span>输出格式</span>
+            <select id="summarizer-format">
+              <option value="paragraph">段落</option>
+              <option value="bullets">要点列表</option>
+            </select>
+          </label>
+          <label>
+            <span>目标语言</span>
+            <input type="text" id="summarizer-language" placeholder="例如：zh 或 en" />
+          </label>
+          <label>
+            <span>超时时间（毫秒）</span>
+            <input type="number" id="summarizer-timeout" min="1000" step="500" />
+          </label>
+        </div>
+      </section>
+
+      <section>
+        <h2>分类配置</h2>
+        <p class="section-hint">为每个分类设置名称、关键词（使用逗号或换行分隔）和简要说明。关键词用于第一阶段的快速匹配。</p>
+        <div class="category-table">
+          <div class="category-header">
+            <span>名称</span>
+            <span>关键词</span>
+            <span>说明</span>
+            <span class="actions-col">操作</span>
+          </div>
+          <div id="category-rows"></div>
+          <button id="add-category" type="button" class="ghost">➕ 添加分类</button>
+        </div>
+      </section>
+
+      <section>
+        <h2>导出偏好</h2>
+        <div class="field-grid">
+          <label>
+            <span>默认导出格式</span>
+            <select id="export-format">
+              <option value="markdown">Markdown</option>
+              <option value="json">JSON</option>
+              <option value="csv">CSV</option>
+            </select>
+          </label>
+          <label>
+            <span>文件名前缀</span>
+            <input type="text" id="export-prefix" placeholder="x-bookmarks" />
+          </label>
+        </div>
+      </section>
+
+      <footer>
+        <button id="reset-button" type="button" class="ghost">恢复默认</button>
+        <div class="spacer"></div>
+        <button id="save-button" type="button">保存设置</button>
+        <span id="status" aria-live="polite"></span>
+      </footer>
+    </main>
+
+    <template id="category-row-template">
+      <div class="category-row">
+        <input type="hidden" class="category-id" />
+        <input type="text" class="category-name" placeholder="分类名称" />
+        <textarea class="category-keywords" rows="2" placeholder="关键词，使用逗号或换行分隔"></textarea>
+        <textarea class="category-description" rows="2" placeholder="分类说明"></textarea>
+        <button type="button" class="remove-category" title="删除">✕</button>
+      </div>
+    </template>
+
+    <script type="module" src="options.js"></script>
+  </body>
+</html>
