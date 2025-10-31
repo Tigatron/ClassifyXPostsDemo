@@ -14,8 +14,7 @@
   "permissions": [
     "tabs",
     "storage",
-    "downloads",
-    "scripting"
+    "downloads"
   ],
   "host_permissions": [
     "https://x.com/i/bookmarks*",

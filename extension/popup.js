@@ -173,22 +173,6 @@ function listenForSettingsChanges() {
   });
 }
 
-async function injectContentScript(tabId) {
-  if (!chrome?.scripting?.executeScript) {
-    return false;
-  }
-  try {
-    await chrome.scripting.executeScript({
-      target: { tabId },
-      files: ['content-script.js'],
-    });
-    return true;
-  } catch (error) {
-    console.warn('手动注入内容脚本失败', error);
-    return false;
-  }
-}
-
 async function requestBookmarkPosts() {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   if (!tab || !tab.id) {
@@ -198,43 +182,12 @@ async function requestBookmarkPosts() {
   if (!/https?:\/\/(x|twitter)\.com\/i\/bookmarks/i.test(url)) {
     throw new Error('请在 X 书签页面打开插件。');
   }
-
-  const sendCollectMessage = () =>
-    new Promise((resolve, reject) => {
-      chrome.tabs.sendMessage(tab.id, { type: 'COLLECT_BOOKMARK_POSTS' }, (response) => {
-        const lastError = chrome.runtime?.lastError;
-        if (lastError) {
-          reject(new Error(lastError.message || '无法与内容脚本通信。'));
-          return;
-        }
-        resolve(response);
-      });
-    });
-
   let response;
   try {
-    response = await sendCollectMessage();
+    response = await chrome.tabs.sendMessage(tab.id, { type: 'COLLECT_BOOKMARK_POSTS' });
   } catch (error) {
-    const message = error?.message ?? '';
-    if (message.includes('Could not establish connection')) {
-      const injected = await injectContentScript(tab.id);
-      if (injected) {
-        // give the injected script a brief moment to register listeners
-        await new Promise((resolve) => setTimeout(resolve, 200));
-        try {
-          response = await sendCollectMessage();
-        } catch (retryError) {
-          console.warn('重新尝试与内容脚本通信仍然失败', retryError);
-          throw new Error('无法连接到书签页面，请刷新页面后重试。');
-        }
-      } else {
-        throw new Error('内容脚本尚未加载，请刷新书签页面后重试。');
-      }
-    } else {
-      throw new Error(message || '无法与页面内容脚本通信。');
-    }
+    throw new Error(error?.message ?? '无法与页面内容脚本通信。');
   }
-
   if (!response?.ok) {
     throw new Error(response?.message ?? '采集书签帖子失败。');
   }
