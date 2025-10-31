@@ -1,0 +1,54 @@
+{
+  "manifest_version": 3,
+  "name": "X Bookmark AI Classifier",
+  "description": "自动提取并分类 X（Twitter）书签，依托 Chrome 内置 Summarizer AI 提供摘要与分类侧边栏。",
+  "version": "1.0.0",
+  "action": {
+    "default_popup": "src/popup/popup.html",
+    "default_title": "X 书签智能分类"
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "permissions": [
+    "storage",
+    "activeTab",
+    "scripting",
+    "sidePanel",
+    "tabs",
+    "offscreen"
+  ],
+  "host_permissions": [
+    "https://x.com/*",
+    "https://twitter.com/*"
+  ],
+  "background": {
+    "service_worker": "src/background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://x.com/i/bookmarks*",
+        "https://twitter.com/i/bookmarks*"
+      ],
+      "js": [
+        "src/content/bookmarkCollector.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "side_panel": {
+    "default_path": "src/sidepanel/sidepanel.html"
+  },
+  "options_page": "src/options/options.html",
+  "offscreen_documents": [
+    {
+      "url": "src/offscreen/offscreen.html",
+      "reason": "DOM_PARSER",
+      "justification": "需要在渲染上下文调用 Chrome 内置 Summarizer API 用于摘要生成。"
+    }
+  ]
+}

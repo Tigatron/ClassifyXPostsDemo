@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>X 书签分类历史</title>
+    <link rel="stylesheet" href="history.css" />
+  </head>
+  <body>
+    <header>
+      <h1>历史分类记录</h1>
+      <div class="actions">
+        <button id="refreshButton">刷新</button>
+        <button id="clearButton" class="ghost">清空历史</button>
+      </div>
+    </header>
+
+    <main>
+      <section id="historyContainer" class="history-container"></section>
+    </main>
+
+    <template id="historyTemplate">
+      <article class="history-card">
+        <header>
+          <h2 class="history-title"></h2>
+          <div class="history-meta">
+            <span class="history-time"></span>
+            <span class="history-count"></span>
+          </div>
+        </header>
+        <div class="history-actions">
+          <button class="view-sidepanel">在侧边栏查看</button>
+          <button class="copy-markdown">复制 Markdown</button>
+          <button class="download-json">下载 JSON</button>
+        </div>
+        <div class="history-body">
+          <ul class="history-categories"></ul>
+        </div>
+      </article>
+    </template>
+
+    <script type="module" src="history.js"></script>
+  </body>
+</html>

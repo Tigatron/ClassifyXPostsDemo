@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>X 书签分类侧边栏</title>
+    <link rel="stylesheet" href="sidepanel.css" />
+  </head>
+  <body>
+    <header class="panel-header">
+      <div>
+        <h1>X 书签分类</h1>
+        <p id="runInfo" class="muted">尚无数据</p>
+      </div>
+      <div class="header-actions">
+        <button id="refreshButton" title="刷新最新结果">⟳</button>
+        <button id="copyMarkdownButton" title="复制 Markdown">📋</button>
+      </div>
+    </header>
+
+    <section id="summarySection" class="summary-section">
+      <div class="summary-item">
+        <span class="summary-label">书签总数</span>
+        <span id="totalCount" class="summary-value">0</span>
+      </div>
+      <div class="summary-item">
+        <span class="summary-label">分类数</span>
+        <span id="categoryCount" class="summary-value">0</span>
+      </div>
+      <div class="summary-item">
+        <span class="summary-label">更新时间</span>
+        <span id="updatedAt" class="summary-value">-</span>
+      </div>
+    </section>
+
+    <section id="categoryContainer" class="category-container"></section>
+
+    <template id="categoryTemplate">
+      <details class="category-card" open>
+        <summary>
+          <span class="category-name"></span>
+          <span class="category-meta"></span>
+        </summary>
+        <ul class="bookmark-list"></ul>
+      </details>
+    </template>
+
+    <template id="bookmarkTemplate">
+      <li class="bookmark-item">
+        <a class="bookmark-link" target="_blank" rel="noopener noreferrer"></a>
+        <p class="bookmark-summary"></p>
+        <div class="bookmark-meta">
+          <span class="author"></span>
+          <span class="datetime"></span>
+        </div>
+      </li>
+    </template>
+
+    <script type="module" src="sidepanel.js"></script>
+  </body>
+</html>

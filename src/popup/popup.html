@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>X 书签智能分类</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <header class="popup-header">
+      <h1>X 书签智能分类</h1>
+      <button id="helpButton" title="查看使用指南">?</button>
+    </header>
+    <main>
+      <section class="status-card">
+        <div class="status-row">
+          <span class="status-label">当前状态</span>
+          <span id="statusText" class="status-value">等待开始</span>
+        </div>
+        <div class="status-row">
+          <span class="status-label">书签总数</span>
+          <span id="bookmarkCount" class="status-value">0</span>
+        </div>
+        <div class="status-row">
+          <span class="status-label">摘要生成</span>
+          <span id="summaryCount" class="status-value">0</span>
+        </div>
+        <div class="status-row">
+          <span class="status-label">分类完成</span>
+          <span id="classifiedCount" class="status-value">0</span>
+        </div>
+        <div class="progress-bar">
+          <div id="progressFill"></div>
+        </div>
+        <p id="progressMessage" class="status-message">尚未开始</p>
+        <button id="startButton" class="primary">▶ 开始自动分类</button>
+      </section>
+
+      <section class="results-card">
+        <header>
+          <h2>分类结果预览</h2>
+          <button id="openSidePanelButton" class="ghost">在侧边栏查看</button>
+        </header>
+        <ul id="categoryList" class="category-list"></ul>
+      </section>
+
+      <section class="actions-card">
+        <h2>导出</h2>
+        <div class="actions">
+          <button data-export="markdown">📋 复制 Markdown</button>
+          <button data-export="json">💾 下载 JSON</button>
+          <button data-export="csv">🧾 下载 CSV</button>
+        </div>
+      </section>
+    </main>
+    <footer class="footer">
+      <button id="optionsButton">⚙ 设置</button>
+      <button id="historyButton">📁 查看历史</button>
+    </footer>
+
+    <dialog id="helpDialog">
+      <h3>使用指南</h3>
+      <ol>
+        <li>在 Chrome 中打开 <code>https://x.com/i/bookmarks</code> 页面。</li>
+        <li>点击 “开始自动分类”。插件会自动滚动并提取所有书签。</li>
+        <li>等待摘要与分类完成后，可在侧边栏查看详细分类。</li>
+        <li>使用导出功能复制或下载分类结果。</li>
+      </ol>
+      <button id="closeHelpButton">关闭</button>
+    </dialog>
+
+    <script type="module" src="popup.js"></script>
+  </body>
+</html>

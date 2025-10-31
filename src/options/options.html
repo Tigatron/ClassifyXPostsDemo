@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>X 书签智能分类 - 设置</title>
+    <link rel="stylesheet" href="options.css" />
+  </head>
+  <body>
+    <header>
+      <h1>设置</h1>
+      <p>根据个人需求自定义摘要参数、分类关键词以及历史记录策略。</p>
+    </header>
+
+    <main>
+      <section>
+        <h2>AI 摘要配置</h2>
+        <form id="summaryForm">
+          <label>
+            摘要类型
+            <select name="type">
+              <option value="key-points">关键要点</option>
+              <option value="paragraph">段落摘要</option>
+              <option value="headline">一句话</option>
+            </select>
+          </label>
+          <label>
+            输出格式
+            <select name="format">
+              <option value="plain-text">纯文本</option>
+              <option value="bullets">项目符号</option>
+            </select>
+          </label>
+          <label>
+            摘要长度
+            <select name="length">
+              <option value="short">短</option>
+              <option value="medium">中</option>
+              <option value="long">长</option>
+            </select>
+          </label>
+          <label>
+            全局上下文
+            <textarea name="sharedContext" rows="3"></textarea>
+          </label>
+          <label>
+            单条聚焦指引
+            <textarea name="perItemFocus" rows="3"></textarea>
+          </label>
+        </form>
+      </section>
+
+      <section>
+        <h2>分类配置</h2>
+        <div id="categoriesContainer"></div>
+        <button id="addCategoryButton" class="secondary">➕ 添加分类</button>
+      </section>
+
+      <section>
+        <h2>其他</h2>
+        <label class="inline">
+          <input type="checkbox" id="autoOpenSidePanel" />
+          自动在分类完成后打开侧边栏
+        </label>
+        <label>
+          历史记录上限
+          <input type="number" id="historyLimit" min="1" max="50" />
+        </label>
+      </section>
+    </main>
+
+    <footer>
+      <button id="resetButton" class="ghost">恢复默认</button>
+      <div>
+        <button id="saveButton" class="primary">保存设置</button>
+        <span id="statusLabel"></span>
+      </div>
+    </footer>
+
+    <template id="categoryTemplate">
+      <div class="category-card">
+        <div class="category-header">
+          <input type="text" class="category-name" placeholder="分类名称" />
+          <button class="remove-category" title="删除分类">✕</button>
+        </div>
+        <label>
+          关键词（以英文逗号或空格分隔）
+          <input type="text" class="category-keywords" placeholder="示例：AI, 人工智能, LLM" />
+        </label>
+        <label class="inline">
+          <input type="radio" name="fallback" class="fallback-radio" />
+          作为默认分类
+        </label>
+      </div>
+    </template>
+
+    <script type="module" src="options.js"></script>
+  </body>
+</html>

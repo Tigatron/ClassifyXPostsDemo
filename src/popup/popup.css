@@ -1,0 +1,196 @@
+:root {
+  color-scheme: light dark;
+  font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 14px;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background: #f5f7fb;
+  min-width: 360px;
+  max-width: 380px;
+}
+
+.popup-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #2563eb, #0ea5e9);
+  color: #fff;
+}
+
+.popup-header h1 {
+  font-size: 16px;
+  margin: 0;
+}
+
+.popup-header button {
+  border: none;
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+}
+
+main {
+  padding: 16px;
+}
+
+section {
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.08);
+  margin-bottom: 16px;
+}
+
+.status-card .status-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  color: #0f172a;
+}
+
+.status-label {
+  color: #475569;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  border-radius: 999px;
+  background: #e2e8f0;
+  overflow: hidden;
+  margin: 12px 0;
+}
+
+#progressFill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(135deg, #6366f1, #22d3ee);
+  transition: width 0.3s ease;
+}
+
+.status-message {
+  color: #475569;
+  margin: 8px 0 16px;
+}
+
+button {
+  border: none;
+  border-radius: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+button.primary {
+  width: 100%;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: #fff;
+  padding: 10px 12px;
+}
+
+button.ghost {
+  background: none;
+  color: #2563eb;
+  font-size: 12px;
+  padding: 4px 0;
+}
+
+button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 12px rgba(15, 23, 42, 0.12);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.results-card header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.category-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.category-list li {
+  background: #f8fafc;
+  border-radius: 10px;
+  padding: 10px;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.category-list li.empty {
+  justify-content: center;
+  color: #94a3b8;
+  font-style: italic;
+}
+
+.category-list .category-name {
+  color: #0f172a;
+  font-weight: 600;
+}
+
+.category-list .category-count {
+  color: #2563eb;
+  font-weight: 600;
+  background: rgba(37, 99, 235, 0.12);
+  padding: 4px 8px;
+  border-radius: 999px;
+}
+
+.actions-card .actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.actions-card button {
+  flex: 1;
+  background: #0ea5e9;
+  color: #fff;
+}
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: #e2e8f0;
+}
+
+.footer button {
+  background: #fff;
+  color: #0f172a;
+}
+
+dialog {
+  border: none;
+  border-radius: 12px;
+  padding: 16px;
+  max-width: 320px;
+}
+
+dialog::backdrop {
+  background: rgba(15, 23, 42, 0.3);
+}
