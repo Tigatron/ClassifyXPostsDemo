@@ -1,14 +1,21 @@
 {
   "manifest_version": 3,
   "name": "Classify X Bookmarks",
-  "description": "Auto-scroll X bookmarks and classify saved posts using Chrome's built-in AI language model APIs.",
-  "version": "1.0.0",
+  "description": "Auto-scroll X bookmarks, summarize them with Chrome built-in AI, and classify the results。",
+  "version": "1.1.0",
   "action": {
     "default_popup": "popup.html",
     "default_title": "Classify X Bookmarks"
   },
+  "options_page": "options.html",
+  "side_panel": {
+    "default_path": "sidepanel.html"
+  },
   "permissions": [
-    "tabs"
+    "tabs",
+    "storage",
+    "downloads",
+    "scripting"
   ],
   "host_permissions": [
     "https://x.com/i/bookmarks*",
